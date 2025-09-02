@@ -1,4 +1,3 @@
-
 import axios, { AxiosInstance } from 'axios';
 
 interface Category {
@@ -9,7 +8,7 @@ interface Category {
   image: string;
   subcategoryCount: number;
   subcategories: any[];
-   success: boolean;
+  success: boolean;
   categories: Category[];
   totalCategories?: number;
   totalActiveCategories?: number;
@@ -21,7 +20,7 @@ interface MenuItem {
   name: string;
   description: string;
   price: number;
-  category: {name: string, subcategory: string}; // This should match category._id
+  category: {name: string, subcategory: string};
   image: string;
   success: boolean;
   products: MenuItem[];
@@ -31,7 +30,6 @@ interface MenuItem {
     totalInStock: number;
     totalOutOfStock: number;
   };
-
 }
 
 interface OrderItem {
@@ -45,6 +43,18 @@ interface PaymentData {
     email: string;
     address: string;
     phone: string;
+}
+
+
+interface Banner {
+  _id: string;
+  name: string;
+  image: {
+    id: string;
+    url: string;
+  };
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 const api: AxiosInstance = axios.create({
@@ -76,6 +86,17 @@ export const getCategories = async (): Promise<Category[]> => {
   }
 };
 
+// Fetch all banners
+export const getBanners = async (): Promise<Banner[]> => {
+  try {
+    const response = await api.get('/banner');
+    return response.data?.banner || [];
+  } catch (error) {
+    console.error('Error fetching banners:', error);
+    throw error;
+  }
+};
+
 // paymeent to paystack
 export const initializePayment = async (items: PaymentData) => {
   console.log(items, "items in payment initialization");
@@ -88,6 +109,5 @@ export const initializePayment = async (items: PaymentData) => {
     throw error;
   }
 }
-
 
 export default api;

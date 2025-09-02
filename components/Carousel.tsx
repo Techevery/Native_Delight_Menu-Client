@@ -2,8 +2,8 @@
 
 import * as React from "react"
 import Autoplay from "embla-carousel-autoplay"
+import { getBanners } from "../libs/api" 
 
-// import { Card, CardContent } from "@/components/ui/card"
 import {
     Carousel,
     CarouselContent,
@@ -12,30 +12,77 @@ import {
     CarouselPrevious,
 } from "@/components/ui/carousel"
 
-// Example images (replace with your own URLs)
-const images = [
-    'https://i.im.ge/2025/03/24/ph7ZuT.DGIx18St6MlJPG.jpeg',
-    'https://i.im.ge/2025/03/24/ph7Rf0.DGIx18St6Ml-0JPG.jpeg',
-    'https://i.im.ge/2025/03/24/ph7V8L.20250205-205749.jpeg',
-    'https://i.im.ge/2025/03/24/ph7nPS.DGIx18St6MlJPG-copy.jpeg',
-    'https://i.im.ge/2025/03/24/ph7Jdy.DGIx18St6Ml-0JPG-copy.jpeg',
-    'https://i.im.ge/2025/03/24/ph74fz.IMG-6955-copy.jpeg',
-    'https://i.im.ge/2025/03/23/ph1wZ1.lounge.jpeg',
-    'https://i.im.ge/2025/03/23/ph1tbr.lounge-1-copy.jpeg',
-    'https://i.im.ge/2025/03/23/phXbmm.Loaded-Jollof-rice.jpeg',
-    'https://i.im.ge/2025/03/23/phXcZr.Asun-rice.jpeg',
-    'https://i.im.ge/2025/03/23/phXRh0.20250104-233025.jpeg',
-    'https://i.im.ge/2025/03/23/phX8oW.egusi-and-eba.jpeg',
-    'https://i.im.ge/2025/03/23/ph10yC.IMG-8524-1.jpeg',
-    'https://i.im.ge/2025/03/23/ph15Hq.milkshake.jpeg',
-    'https://i.im.ge/2025/03/23/ph1yBW.small-chops.jpeg',
-    'https://i.im.ge/2025/03/23/ph1Y1L.lounge-2-copy.jpeg',
-]
+interface Banner {
+  _id: string;
+  name: string;
+  image?: {
+    id: string;
+    url: string;
+  };
+}
 
 export default function CarouselPlugin() {
+    const [banners, setBanners] = React.useState<Banner[]>([])
+    const [loading, setLoading] = React.useState(true)
+    const [error, setError] = React.useState<string | null>(null)
+
     const plugin = React.useRef(
-        Autoplay({ delay: 2000, stopOnInteraction: true })
+        Autoplay({ delay: 5000, stopOnInteraction: true })
     )
+
+    React.useEffect(() => {
+        const fetchBanners = async () => {
+            try {
+                setLoading(true)
+                const bannerData = await getBanners()
+                setBanners(bannerData)
+            } catch (err) {
+                setError('Failed to load banners')
+                console.error('Error fetching banners:', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchBanners()
+    }, [])
+
+    console.log(banners)
+    // Filter out banners without images or with invalid image URLs
+    const validBanners = banners.filter(banner => 
+        banner.image?.url && banner.image.url.trim() !== ''
+    )
+console.log(validBanners)
+    if (loading) {
+        return (
+            <div className="w-full h-[300px] md:h-screen flex items-center justify-center bg-gray-100">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Loading banners...</p>
+                </div>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="w-full h-[300px] md:h-screen flex items-center justify-center bg-gray-100">
+                <div className="text-center text-red-600">
+                    <p>{error}</p>
+                </div>
+            </div>
+        )
+    }
+
+    if (validBanners.length === 0) {
+        return (
+            <div className="w-full h-[300px] md:h-screen flex items-center justify-center bg-gray-100">
+                <div className="text-center text-gray-600">
+                    <p>No banners available</p>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <Carousel
@@ -45,23 +92,18 @@ export default function CarouselPlugin() {
             onMouseLeave={plugin.current.reset}
         >
             <CarouselContent>
-                {images.map((img, index) => (
-                    <CarouselItem key={index} className="h-screen ">
+                {validBanners.map((banner) => (
+                    <CarouselItem key={banner._id} className="h-screen">
                         <div className="relative w-full h-full">
                             <div
                                 className="absolute inset-0 bg-cover bg-center"
                                 style={{
-                                    backgroundImage: `url(${img})`,
+                                    backgroundImage: `url(${banner.image?.url})`,
                                     minHeight: "300px",
                                 }}
                             />
-                            {/* <Card className="relative bg-transparent shadow-none h-full flex items-center justify-center">
-                                <CardContent className="flex flex-col items-center justify-center h-full bg-black/40">
-                                    <span className="text-4xl font-semibold text-white drop-shadow-lg">
-                                        {index + 1}
-                                    </span>
-                                </CardContent>
-                            </Card> */}
+                            {/* Optional: Add accessible text for screen readers */}
+                            <span className="sr-only">{banner.name}</span>
                         </div>
                     </CarouselItem>
                 ))}
