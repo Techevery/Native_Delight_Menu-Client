@@ -4,17 +4,16 @@ run-name: Build and Deploy Frontend by ${{ github.actor }} 🚀
 on:
   push:
     branches:
-      - main  # Change to 'master' if your branch is named that
+      - main
   pull_request:
     branches:
-      - main  # Change to 'master' if your branch is named that
+      - main
+    types:
+      - closed
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./  # Change to './admin' if Next.js is in a subfolder
     env:
       NODE_VERSION: '20'
     steps:
@@ -33,22 +32,22 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps || { echo "npm ci failed"; exit 1; }
 
       - name: TypeScript type check
         run: npm run type-check || echo "No type-check script, skipping (Next.js build will check types)"
-        continue-on-error: true  # Optional, since Next.js build handles TS
+        continue-on-error: true
 
       - name: Build Next.js
-        run: npm run build
+        run: npm run build || { echo "Build failed"; exit 1; }
 
       - name: Run tests
-        run: 'npm test || echo "No tests defined, skipping"'
+        run: npm test || echo "No tests defined, skipping"
         shell: bash
         continue-on-error: true
 
       - name: List built files
-        run: 'ls -la .next || echo "Build directory not found, check next.config.js"'
+        run: ls -la .next || echo "Build directory not found, check next.config.js"
         shell: bash
         continue-on-error: true
 
@@ -59,7 +58,7 @@ jobs:
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'  # Deploy only on main branch pushes
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     steps:
       - name: Deploy to Contabo VPS
         uses: appleboy/ssh-action@master
@@ -69,9 +68,31 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             echo "Starting deployment..."
-            cd ~/app/native_delight/client  # Adjust to your VPS app folder
-            git pull origin main
-            npm ci
-            npm run build
-            pm2 restart client  # Adjust to your PM2 process name
-            sudo systemctl restart nginx
+            # Fix Git ownership issue
+            git config --global --add safe.directory /home/fevico/app/native_delight/client || { echo "Failed to set safe directory"; exit 1; }
+            # Set up Node.js with nvm
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] || curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
+            source "$NVM_DIR/nvm.sh"
+            nvm install 20 || echo "Node.js 20 already installed"
+            nvm use 20
+            node -v
+            npm -v
+            # Set Git credentials
+            git config --global credential.helper store
+            echo "https://${{ secrets.GIT_USERNAME }}:${{ secrets.GIT_PAT }}@github.com" > ~/.git-credentials
+            chmod 600 ~/.git-credentials
+            cd /home/fevico/app/native_delight/client || { echo "Failed to cd to /home/fevico/app/native_delight/client"; exit 1; }
+            echo "Current directory: $(pwd)"
+            git remote set-url origin https://github.com/Techevery/Native_Delight_Menu-Client.git
+            git fetch origin || { echo "Git fetch failed"; exit 1; }
+            git checkout main || { echo "Git checkout failed"; exit 1; }
+            git pull origin main || { echo "Git pull failed"; exit 1; }
+            echo "Current commit: $(git rev-parse HEAD)"
+            npm ci --legacy-peer-deps || { echo "npm ci failed"; exit 1; }
+            npm run build || { echo "Build failed"; exit 1; }
+            echo "Built files:"
+            ls -la .next
+            pm2 restart client || pm2 start npm --name client -- run start || { echo "PM2 restart/start failed"; exit 1; }
+            echo "Deployment completed"
+            sudo systemctl restart nginx || { echo "Nginx restart failed"; exit 1; }
