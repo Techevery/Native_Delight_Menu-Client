@@ -13,12 +13,14 @@ interface Item {
     _id: string;
     name: string;
   };
+  createdAt?: string;
 }
 
 interface Subcategory {
   name: string;
   _id: string;
   items?: Item[];
+  createdAt?: string;
 }
 
 interface CategoryImage {
@@ -33,6 +35,7 @@ interface Category {
   image: CategoryImage | null;
   subcategoryCount: number;
   subcategories: Subcategory[];
+  createdAt?: string;
 }
 
 interface CategoryModalProps {
@@ -51,20 +54,27 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
   menuItems = []
 }) => {
   const [expandedSubcategory, setExpandedSubcategory] = useState<string | null>('all');
-  // const [selectedView, setSelectedView] = useState<'all' | 'subcategory'>('all');
   
   if (!isOpen || !category) return null;
 
-  // Get all items in this category
+  // Get all items in this category and sort by createdAt
   const allCategoryItems = menuItems.filter(item => 
     item.subCategory && category.subcategories.some(sub => sub.name === item.subCategory.name)
-  );
+  ).sort((a, b) => {
+    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return dateB - dateA;
+  });
 
-  // Enhance subcategories with their items
+  // Enhance subcategories with their items and sort by createdAt
   const subcategoriesWithItems = category.subcategories.map(subcategory => {
     const subcategoryItems = menuItems.filter(item => 
       item.subCategory && item.subCategory.name === subcategory.name
-    );
+    ).sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
     
     return {
       ...subcategory,
@@ -74,7 +84,6 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
 
   const handleSubcategoryClick = (subcategoryId: string) => {
     setExpandedSubcategory(subcategoryId);
-    // setSelectedView(subcategoryId === 'all' ? 'all' : 'subcategory');
   };
 
   const handleSubcategorySelect = (categoryName: string, subcategoryName: string, items: Item[] = []) => {
@@ -154,7 +163,6 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                   }`}
                 >
                   <div className="flex flex-col items-center text-center">
-                    {/* <Grid className="text-amber-600  md:size-6 mb-1" /> */}
                     <span className={`font-bold text-sm ${
                       expandedSubcategory === 'all'
                         ? 'text-amber-700'
@@ -162,9 +170,6 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                     }`}>
                       All Items
                     </span>
-                    {/* <span className="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded-full font-medium mt-2">
-                      {allCategoryItems.length} items
-                    </span> */}
                   </div>
                 </button>
 
@@ -188,9 +193,6 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                         }`}>
                           {subcategory.name}
                         </span>
-                        {/* <span className="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded-full font-medium mt-2">
-                          {subcategory.items?.length || 0} items
-                        </span> */}
                       </div>
                     </button>
                   ))
@@ -236,7 +238,6 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                                   className="object-cover"
                                   unoptimized
                                 />
-                                {/* Status badge positioned at top-right of image */}
                                 <span className={`absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
                                   item.status === 'active' 
                                     ? 'bg-green-100 text-green-700' 
@@ -248,7 +249,6 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                             ) : (
                               <div className="relative w-16 h-16 md:w-20 md:h-20 bg-amber-100 rounded-lg flex items-center justify-center">
                                 <Utensils size={20} className="text-amber-600" />
-                                {/* Status badge positioned at top-right of placeholder */}
                                 <span className={`absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
                                   item.status === 'active' 
                                     ? 'bg-green-100 text-green-700' 
@@ -267,7 +267,6 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                                 {item.subCategory?.name || 'No subcategory'}
                               </p>
                             </div>
-                            {/* Price moved to right side */}
                             <div className="flex justify-end mt-2">
                               <p className="text-amber-600 font-bold text-base md:text-lg">₦{item.price.toLocaleString()}</p>
                             </div>
@@ -324,7 +323,6 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                                       className="object-cover"
                                       unoptimized
                                     />
-                                    {/* Status badge positioned at top-right of image */}
                                     <span className={`absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
                                       item.status === 'active' 
                                         ? 'bg-green-100 text-green-700' 
@@ -336,7 +334,6 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                                 ) : (
                                   <div className="relative w-16 h-16 md:w-20 md:h-20 bg-amber-100 rounded-lg flex items-center justify-center">
                                     <Utensils size={20} className="text-amber-600" />
-                                    {/* Status badge positioned at top-right of placeholder */}
                                     <span className={`absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
                                       item.status === 'active' 
                                         ? 'bg-green-100 text-green-700' 
@@ -352,7 +349,6 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                                   <h4 className="font-bold text-gray-800 text-base md:text-lg mb-1 line-clamp-2">{item.name}</h4>
                                   <p className="text-gray-600 text-xs md:text-sm line-clamp-2">{item.description}</p>
                                 </div>
-                                {/* Price moved to right side */}
                                 <div className="flex justify-end mt-2">
                                   <p className="text-amber-600 font-bold text-base md:text-lg">₦{item.price.toLocaleString()}</p>
                                 </div>

@@ -5,6 +5,7 @@ import { ChevronRight, Package } from 'lucide-react';
 interface Subcategory {
   name: string;
   _id: string;
+  createdAt?: string;
 }
 
 interface CategoryImage {
@@ -16,9 +17,10 @@ interface Category {
   name: string;
   description: string;
   status: string;
-  image: CategoryImage | null; // Updated to object with url
+  image: CategoryImage | null;
   subcategoryCount: number;
   subcategories: Subcategory[];
+  createdAt?: string;
 }
 
 interface CategoryGridProps {
@@ -32,6 +34,13 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
   onCategoryClick,
   activeCategory,
 }) => {
+  // Sort categories by createdAt (newest first)
+  const sortedCategories = [...categories].sort((a, b) => {
+    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return dateB - dateA;
+  });
+
   return (
     <div className="mb-8">
       <div className="mb-6">
@@ -44,7 +53,7 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {categories.map((category) => (
+        {sortedCategories.map((category) => (
           <div
             key={category._id}
             onClick={() => onCategoryClick(category)}

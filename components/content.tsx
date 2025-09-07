@@ -46,6 +46,7 @@ interface MenuItem {
   status: string;
   stock: string;
   image: string;
+  createdAt?: string;
 }
 
 interface CartItem extends MenuItem {
@@ -55,6 +56,7 @@ interface CartItem extends MenuItem {
 interface Subcategory {
   name: string;
   _id: string;
+  createdAt?: string;
 }
 
 interface CategoryImage {
@@ -69,6 +71,7 @@ interface Category {
   image: CategoryImage | null;
   subcategoryCount: number;
   subcategories: Subcategory[];
+  createdAt?: string;
 }
 
 const Foodmenu: React.FC = () => {
@@ -112,6 +115,7 @@ const Foodmenu: React.FC = () => {
             status: item.status,
             stock: item.stock,
             image: item.image,
+            createdAt: item.createdAt,
           }));
         } else if (itemsResponse && typeof itemsResponse === 'object' && 'success' in itemsResponse) {
           menuItemsData = (itemsResponse as MenuItemsResponse).success
@@ -125,6 +129,7 @@ const Foodmenu: React.FC = () => {
                 status: item.status,
                 stock: item.stock,
                 image: item.image,
+                createdAt: item.createdAt,
               }))
             : [];
         }
@@ -137,6 +142,7 @@ const Foodmenu: React.FC = () => {
             image: typeof cat.image === 'string'
               ? { url: cat.image }
               : cat.image || null,
+            createdAt: cat.createdAt,
           }));
         } else if (categoriesResponse && typeof categoriesResponse === 'object' && 'success' in categoriesResponse) {
           categoriesData = (categoriesResponse as CategoriesResponse).success 
@@ -145,12 +151,27 @@ const Foodmenu: React.FC = () => {
                 image: typeof cat.image === 'string'
                   ? { url: cat.image }
                   : cat.image || null,
+                createdAt: cat.createdAt,
               }))
             : [];
         }
         
-        setMenuItems(menuItemsData);
-        setCategories(categoriesData);
+        // Sort menu items by createdAt (newest first)
+        const sortedMenuItems = menuItemsData.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
+        
+        // Sort categories by createdAt (newest first)
+        const sortedCategories = categoriesData.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
+        
+        setMenuItems(sortedMenuItems);
+        setCategories(sortedCategories);
         setLoading(false);
       } catch (err) {
         setError('Failed to load menu or categories. Please try again later.');
@@ -408,7 +429,7 @@ const Foodmenu: React.FC = () => {
           {/* Instagram SVG icon from Simple Icons */}
       
           <svg className="w-5 h-5 mr-2 text-red-950" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.974.974 1.246 2.241 1.308 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.334 2.633-1.308 3.608-.974.974-2.241 1.246-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.334-3.608-1.308-.974-.974-1.246-2.241-1.308-3.608C2.175 15.647 2.163 15.267 2.163 12s.012-3.584.07-4.85c.062-1.366.334-2.633 1.308-3.608C4.515 2.497 5.782 2.225 7.148 2.163 8.414 2.105 8.794 2.163 12 2.163zm0-2.163C8.741 0 8.332.012 7.052.07 5.771.128 4.659.388 3.678 1.37 2.697 2.351 2.437 3.463 2.379 4.744 2.321 6.024 2.309 6.433 2.309 12c0 5.567.012 5.976.07 7.256.058 1.281.318 2.393 1.299 3.374.981.981 2.093 1.241 3.374 1.299 1.28.058 1.689.07 7.256.07s5.976-.012 7.256-.07c1.281-.058 2.393-.318 3.374-1.299.981-.981 1.241-2.093 1.299-3.374.058-1.28.07-1.689.07-7.256s-.012-5.976-.07-7.256c-.058-1.281-.318-2.393-1.299-3.374-.981-.981-2.093-1.241-3.374-1.299C15.667.012 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zm0 10.162a3.999 3.999 0 1 1 0-7.998 3.999 3.999 0 0 1 0 7.998zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.974.974 1.246 2.241 1.308 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.334 2.633-1.308 3.608-.974.974-2.241 1.246-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.334-3.608-1.308-.974.974-1.246 2.241-1.308 3.608C2.175 15.647 2.163 15.267 2.163 12s.012-3.584.07-4.85c.062-1.366.334-2.633 1.308-3.608C4.515 2.497 5.782 2.225 7.148 2.163 8.414 2.105 8.794 2.163 12 2.163zm0-2.163C8.741 0 8.332.012 7.052.07 5.771.128 4.659.388 3.678 1.370 2.697 2.351 2.437 3.463 2.379 4.744 2.321 6.024 2.309 6.433 2.309 12c0 5.567.012 5.976.07 7.256.058 1.281.318 2.393 1.299 3.374.981.981 2.093 1.241 3.374 1.299 1.28.058 1.689.07 7.256.07s5.976-.012 7.256-.07c1.281-.058 2.393-.318 3.374-1.299.981-.981 1.241-2.093 1.299-3.374.058-1.280.07-1.689.07-7.256s-.012-5.976-.07-7.256c-.058-1.281-.318-2.393-1.299-3.374-.981-.981-2.093-1.241-3.374-1.299C15.667.012 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zm0 10.162a3.999 3.999 0 1 1 0-7.998 3.999 3.999 0 0 1 0 7.998zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
           </svg>
           <a
             href="https://www.instagram.com/native_delightpl5?igsh=YzljYTk1ODg3Zg=="

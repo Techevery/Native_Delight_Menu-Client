@@ -18,6 +18,7 @@ interface MenuItem {
   status: string;
   stock: string;
   image: string;
+  createdAt?: string;
 }
 
 interface MenuProps {
@@ -28,10 +29,17 @@ interface MenuProps {
 const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
   const [viewMode, setViewMode] = useState<'card' | 'modal'>('card');
 
+  // Sort items by createdAt (newest first)
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return dateB - dateA;
+  });
+
   // Card View (Original)
   const CardView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-      {filteredItems.map(item => (
+      {sortedItems.map(item => (
         <div key={item._id} className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
           <div className="relative h-56 overflow-hidden">
             {item.image ? (
@@ -111,7 +119,7 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
   // Modal Style View (New)
   const ModalView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {filteredItems.map(item => (
+      {sortedItems.map(item => (
         <div key={item._id} className="flex flex-col p-4 bg-white rounded-xl border border-gray-200 hover:border-amber-300 hover:shadow-md transition-all duration-300 h-full">
           <div className="flex items-start mb-3">
             <div className="relative mr-3 flex-shrink-0">
