@@ -69,7 +69,7 @@ jobs:
           script: |
             echo "Starting deployment..."
             # Fix Git ownership issue
-            git config --global --add safe.directory /home/fevico/app/native_delight/client || { echo "Failed to set safe directory"; exit 1; }
+            git config --global --add safe.directory /home/fevico/var/www/html/app/native_delight/client || { echo "Failed to set safe directory"; exit 1; }
             # Set up Node.js with nvm
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] || curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
@@ -82,7 +82,7 @@ jobs:
             git config --global credential.helper store
             echo "https://${{ secrets.GIT_USERNAME }}:${{ secrets.GIT_PAT }}@github.com" > ~/.git-credentials
             chmod 600 ~/.git-credentials
-            cd /home/fevico/app/native_delight/client || { echo "Failed to cd to /home/fevico/app/native_delight/client"; exit 1; }
+            cd /var/www/html/app/native_delight/client || { echo "Failed to cd to /home/fevico/app/native_delight/client"; exit 1; }
             echo "Current directory: $(pwd)"
             git remote set-url origin https://github.com/Techevery/Native_Delight_Menu-Client.git
             git fetch origin || { echo "Git fetch failed"; exit 1; }
