@@ -61,16 +61,14 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     steps:
       - name: Deploy to Contabo VPS
-        uses: appleboy/ssh-action@master    
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_IP }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             echo "Starting deployment..."
-            # Fix Git ownership issue
-            git config --global --add safe.directory /home/fevico/var/www/html/app/native_delight/client || { echo "Failed to set safe directory"; exit 1; }
-            # Set up Node.js with nvm
+            git config --global --add safe.directory /var/www/html/app/native_delight/client || { echo "Failed to set safe directory"; exit 1; }
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] || curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
             source "$NVM_DIR/nvm.sh"
@@ -78,15 +76,15 @@ jobs:
             nvm use 20
             node -v
             npm -v
-            # Set Git credentials
             git config --global credential.helper store
-            echo "https://${{ secrets.GIT_USERNAME }}:${{ secrets.GIT_PAT }}@github.com" > ~/.git-credentials
+            echo "https://${{ secrets.GIT_USERNAME }}:${{ secrets.GITH_PAT }}@github.com" > ~/.git-credentials
             chmod 600 ~/.git-credentials
-            cd /var/www/html/app/native_delight/client || { echo "Failed to cd to /home/fevico/var/www/html/app/native_delight/client"; exit 1; }
+            cd /var/www/html/app/native_delight/client || { echo "Failed to cd to /var/www/html/app/native_delight/client"; exit 1; }
             echo "Current directory: $(pwd)"
             git remote set-url origin https://github.com/Techevery/Native_Delight_Menu-Client.git
             git fetch origin || { echo "Git fetch failed"; exit 1; }
             git checkout main || { echo "Git checkout failed"; exit 1; }
+            git reset --hard origin/main || { echo "Git reset failed"; exit 1; }
             git pull origin main || { echo "Git pull failed"; exit 1; }
             echo "Current commit: $(git rev-parse HEAD)"
             npm ci --legacy-peer-deps || { echo "npm ci failed"; exit 1; }
@@ -95,4 +93,4 @@ jobs:
             ls -la .next
             pm2 restart client || pm2 start npm --name client -- run start || { echo "PM2 restart/start failed"; exit 1; }
             echo "Deployment completed"
-            sudo systemctl restart nginx || { echo "Nginx restart failed"; exit 1; }
+            sudo systemctl reload nginx || { echo "Nginx reload failed"; exit 1; }
