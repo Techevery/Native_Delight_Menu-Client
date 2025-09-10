@@ -61,7 +61,7 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     steps:
       - name: Deploy to Contabo VPS
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@master    
         with:
           host: ${{ secrets.VPS_IP }}
           username: ${{ secrets.USERNAME }}
