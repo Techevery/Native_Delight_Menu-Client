@@ -370,11 +370,10 @@ const Foodmenu: React.FC = () => {
           </p>
         </div>
         <div>
-          <h3 className="text-xl font-bold mb-4">Hours</h3>
+          <h3 className="text-xl font-bold mb-4"> Opening Hours</h3>
           <ul className="text-gray-300">
-            <li>Monday - Friday: 8am - 12pm</li>
-            <li>Saturday: 10am - 11pm</li>
-            <li>Sunday: 10am - 9pm</li>
+            <li>Monday - Sunday: 7:00am - 2:00am daily</li>
+
           </ul>
         </div>
         <div>
