@@ -43,26 +43,23 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
         <div key={item._id} className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
           <div className="relative h-56 overflow-hidden">
             {item.image ? (
-              <Image src={item.image}  alt={item.name} width={400} height={224} className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700" style={{ width: '100%', height: '100%' }} unoptimized />
+              <Image src={item.image} alt={item.name} width={400} height={224} className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700" style={{ width: '100%', height: '100%' }} unoptimized />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center">
                 <span className="text-amber-600 text-2xl">🍽️</span>
               </div>
             )}
-                                  
+
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            
-        
+
             <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
               <span className="font-bold">₦{item.price.toLocaleString()}</span>
             </div>
-            
-          
+
             <div className="absolute top-4 left-4 bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm text-xs font-bold">
               {item.stock}
             </div>
-            
-           
+
             <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
               <button
                 onClick={() => addToCart(item)}
@@ -72,32 +69,33 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
               </button>
             </div>
           </div>
-          
+
           <div className="p-6">
             <div className="mb-3">
               <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-amber-600 transition-colors duration-300">
                 {item.name}
               </h3>
               <div className="flex items-center space-x-2 mb-2">
-              
+
               </div>
             </div>
-            
-            <p className="text-gray-600 mb-4 line-clamp-2 leading-relaxed text-sm">
+
+            {/* Fixed: Remove line-clamp-2 for mobile, keep it only for larger screens */}
+            <p className="text-gray-600 mb-4 leading-relaxed text-sm line-clamp-3 md:line-clamp-2">
               {item.description}
             </p>
-            
+
             <div className="flex items-center justify-between mb-4">
               <span className="text-2xl font-bold text-amber-600">₦{item.price.toLocaleString()}</span>
               <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                item.status === 'active' 
-                  ? 'bg-green-100 text-green-700' 
+                item.status === 'active'
+                  ? 'bg-green-100 text-green-700'
                   : 'bg-gray-100 text-gray-600'
               }`}>
                 {item.status === 'active' ? 'Available' : 'Unavailable'}
               </span>
             </div>
-            
+
             <button
               onClick={() => addToCart(item)}
               disabled={item.status !== 'active'}
@@ -125,7 +123,7 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
             <div className="relative mr-3 flex-shrink-0">
               {item.image ? (
                 <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden">
-                  <Image 
+                  <Image
                     src={item.image}
                     alt={item.name}
                     width={80}
@@ -133,10 +131,10 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
                     className="object-cover"
                     unoptimized
                   />
-                 
+
                   <span className={`absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
-                    item.status === 'active' 
-                      ? 'bg-green-100 text-green-700' 
+                    item.status === 'active'
+                      ? 'bg-green-100 text-green-700'
                       : 'bg-gray-100 text-gray-600'
                   }`}>
                     {item.status === 'active' ? 'Available' : 'Unavailable'}
@@ -145,10 +143,10 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
               ) : (
                 <div className="relative w-16 h-16 md:w-20 md:h-20 bg-amber-100 rounded-lg flex items-center justify-center">
                   <span className="text-amber-600 text-xl">🍽️</span>
-              
+
                   <span className={`absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
-                    item.status === 'active' 
-                      ? 'bg-green-100 text-green-700' 
+                    item.status === 'active'
+                      ? 'bg-green-100 text-green-700'
                       : 'bg-gray-100 text-gray-600'
                   }`}>
                     {item.status === 'active' ? 'Available' : 'Unavailable'}
@@ -159,19 +157,22 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
             <div className="flex-1 flex flex-col justify-between h-full">
               <div>
                 <h4 className="font-bold text-gray-800 text-base md:text-lg mb-1 line-clamp-2">{item.name}</h4>
-                <p className="text-gray-600 text-xs md:text-sm mb-1 line-clamp-2">{item.description}</p>
-                
+                {/* Fixed: Remove line-clamp-2 for mobile, show full description */}
+                <p className="text-gray-600 text-xs md:text-sm mb-1 sm:line-clamp-2">
+                  {item.description}
+                </p>
+
                 <p className="text-xs text-gray-500">
                   {item.subCategory?.name || 'No subcategory'}
                 </p>
               </div>
-           
+
               <div className="flex justify-end mt-2">
                 <p className="text-amber-600 font-bold text-base md:text-lg">₦{item.price.toLocaleString()}</p>
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center justify-between mt-auto">
             <span className="text-xs px-2 py-1 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full font-medium">
               {item.stock}
@@ -202,8 +203,8 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
           <button
             onClick={() => setViewMode('card')}
             className={`flex items-center px-3 py-2 rounded-md transition-colors ${
-              viewMode === 'card' 
-                ? 'bg-white text-amber-600 shadow-sm' 
+              viewMode === 'card'
+                ? 'bg-white text-amber-600 shadow-sm'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -213,8 +214,8 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
           <button
             onClick={() => setViewMode('modal')}
             className={`flex items-center px-3 py-2 rounded-md transition-colors ${
-              viewMode === 'modal' 
-                ? 'bg-white text-amber-600 shadow-sm' 
+              viewMode === 'modal'
+                ? 'bg-white text-amber-600 shadow-sm'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
