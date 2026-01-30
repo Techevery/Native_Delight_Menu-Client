@@ -3,6 +3,7 @@
 import * as React from "react"
 import Autoplay from "embla-carousel-autoplay"
 import { getBanners } from "../libs/api" 
+// Adjust the import path as necessary
 
 import {
     Carousel,
